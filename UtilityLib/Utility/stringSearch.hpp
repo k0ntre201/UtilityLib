@@ -1,11 +1,12 @@
 #ifndef __STRING_SEARCH_h
 #define __STRING_SEARCH_h
 
+#include "utility.hpp"
+
 #include <exception>
-#include <iterator>
 #include <map>
 #include <set>
-
+#include <type_traits>
 
 namespace UtilityLib::stringSearcher {
 
@@ -14,8 +15,9 @@ namespace UtilityLib::stringSearcher {
 	Function return iterator to string where pattern exist
 	If pattern do not occure in string then return end iterator of string.
 	*/
-	template <typename Iter>
-	Iter boyer_moore_horspool(Iter sBegin, Iter sEnd, Iter patternBegin, Iter patternEnd)
+	template <typename _Iter1, typename _Iter2, typename = typename
+		std::enable_if<is_iterator<_Iter1>::value>::type>
+	_Iter1 boyer_moore_horspool(_Iter1 sBegin, _Iter1 sEnd, _Iter2 patternBegin, _Iter2 patternEnd)
 	{
 		auto stringDistance = sEnd - sBegin;
 		auto patternDistance = patternEnd - patternBegin;

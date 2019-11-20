@@ -2,6 +2,7 @@
 #define __STRING_SEARCH_UNIT_TEST
 
 #include <functional>
+#include <iostream>
 #include <map>
 #include <string>
 #include <vector>
@@ -29,7 +30,17 @@ bool testSubStringSearchAlgorithm(TestFunction f)
 		}
 	}
 
-	return true;
+	try
+	{
+		f(patterns[0].first, text);
+	}
+
+	catch (std::runtime_error err)
+	{
+		return true;
+	}
+
+	return false;
 }
 
 #endif // !__STRING_SEARCH_UNIT_TEST
