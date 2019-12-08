@@ -5,7 +5,7 @@ TEST(TokenizerTest, TokenizeSimple)
 {
 	std::string testString("Ala ma kota a kot ma Ale");
 
-	std::vector<std::string> tokens = UtilityLib::tockenizer::tokenize<std::vector<std::string>>(std::begin(testString), std::end(testString), " ");
+	std::vector<std::string> tokens = UtilityLib::tokenizer::tokenize<std::vector<std::string>>(std::begin(testString), std::end(testString), " ");
 
 	EXPECT_FALSE(tokens.empty());
 
@@ -21,7 +21,7 @@ TEST(TokenizerTest, TokenizeEndLine)
 {
 	std::string testString("Ala ma kota a kot ma Ale\r\nCo by sie stalo gdy sie nie stanie");
 
-	std::vector<std::string> tokens = UtilityLib::tockenizer::tokenize<std::vector<std::string>>(std::begin(testString), std::end(testString), "\r\n");
+	std::vector<std::string> tokens = UtilityLib::tokenizer::tokenize<std::vector<std::string>>(std::begin(testString), std::end(testString), "\r\n");
 
 	EXPECT_FALSE(tokens.empty());
 

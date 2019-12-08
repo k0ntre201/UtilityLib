@@ -6,7 +6,7 @@
 #include <algorithm>
 #include <string>
 
-namespace UtilityLib::tockenizer 
+namespace UtilityLib::tokenizer 
 {
 
 	template <typename Vec, typename Iter, typename Trimmer, typename = typename
