@@ -11,13 +11,11 @@
 
 //TODO - check is a char[] type and to trim '/0' value if exist. 
 //TODO - Do not allow dunamic pointers because is a problem with deduce iterators
-//TODO - declare type for search pattern in more object. Not only for char
+//TODO - declare type for search pattern for more object. Not only for char
 
 
-namespace UtilityLib::stringSearcher {
-	template<class T>
-	T pi;
-
+namespace UtilityLib::stringSearcher 
+{
 	/*
 	Function search occurence of pattern in string.
 	Function return iterator to string where pattern exist
