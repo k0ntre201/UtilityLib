@@ -7,7 +7,7 @@
 
 
 /*
-Chect whether _Iter is an iterator. Value true if it is an iterator or poiter type.
+Chect whether _Iter is an iterator. Value true if it is an iterator or pointer type.
 Otherwise value is equal to false;
 */
 
