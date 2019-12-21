@@ -1,7 +1,7 @@
 #include <iostream>
 #include "Utility/threadpool.hpp"
 
-int main() 
+int main()
 {
 	return 0;
 }

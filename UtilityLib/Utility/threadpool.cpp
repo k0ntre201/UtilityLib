@@ -2,10 +2,11 @@
 
 #include <iostream>
 
-std::shared_ptr<UtilityLib::threading::ThreadPool> UtilityLib::threading::ThreadPool::_instance = nullptr;
+std::shared_ptr<UtilityLib::threading::ThreadPool> UtilityLib::threading::ThreadPoolSingleton::_instance = nullptr;
 
 UtilityLib::threading::ThreadPool::~ThreadPool()
 {
+	std::cout << "Destroy thread pool\n";
 	stop();
 }
 
@@ -16,6 +17,7 @@ size_t UtilityLib::threading::ThreadPool::getPoolSize()
 
 UtilityLib::threading::ThreadPool::ThreadPool(size_t n)
 {
+	std::cout << "Create thread pool\n";
 	terminateThreads = false;
 	for (size_t i = 0; i < n; ++i)
 	{

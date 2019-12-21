@@ -17,16 +17,8 @@ namespace UtilityLib::threading
 	class ThreadPool : public nocopyable
 	{
 	public:
+		ThreadPool(size_t n);
 
-		// Get instance of thread pool. Pool has size of hardwate cores as a default.
-		static std::shared_ptr<ThreadPool> getInstance(size_t n = std::thread::hardware_concurrency())
-		{
-			if (_instance == nullptr)
-				_instance = std::shared_ptr<ThreadPool>(new ThreadPool(n));
-
-			return _instance;
-		}
-		
 		// Add task to thread pool. Only invocable objects are allowed to be executed.
 		template <typename F, typename... Args,
 			std::enable_if_t<std::is_invocable_v<F&&, Args &&...>, int> = 0>
@@ -46,17 +38,12 @@ namespace UtilityLib::threading
 		~ThreadPool();
 
 		size_t getPoolSize();
-
-	private:
-		ThreadPool(size_t n);
-
+	
+	protected:
 		void stop();
 		void loop();
 
-	protected:
-
-	// Helper struct for store generic tasks
-	private:
+		// Helper struct for store generic tasks
 		struct TaskBase
 		{
 			virtual ~TaskBase() {}
@@ -86,8 +73,25 @@ namespace UtilityLib::threading
 		std::condition_variable _notifier;
 		std::queue<std::unique_ptr<TaskBase>> _tasks;
 
+	};
+
+	class ThreadPoolSingleton : public ThreadPool
+	{
+	public:
+		// Get instance of thread pool. Pool has size of hardwate cores as a default.
+		static std::shared_ptr<ThreadPool> getInstance(size_t n = std::thread::hardware_concurrency() + 1)
+		{
+			if (_instance == nullptr)
+				_instance = std::shared_ptr<ThreadPool>(new ThreadPool(n));
+
+			return _instance;
+		}
+	private:
+		ThreadPoolSingleton(size_t n):ThreadPool(n) {}
 		static std::shared_ptr<ThreadPool> _instance;
 	};
+
+
 }
 
 #endif // !UTILITYLIB_UTILITY_THREADPOOL_HPP
