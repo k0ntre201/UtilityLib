@@ -2,22 +2,20 @@
 
 #include <iostream>
 
-std::shared_ptr<UtilityLib::threading::ThreadPool> UtilityLib::threading::ThreadPoolSingleton::_instance = nullptr;
+std::shared_ptr<UtilityLib::Threading::ThreadPool> UtilityLib::Threading::ThreadPoolSingleton::_instance = nullptr;
 
-UtilityLib::threading::ThreadPool::~ThreadPool()
+UtilityLib::Threading::ThreadPool::~ThreadPool()
 {
-	std::cout << "Destroy thread pool\n";
 	stop();
 }
 
-size_t UtilityLib::threading::ThreadPool::getPoolSize()
+size_t UtilityLib::Threading::ThreadPool::getPoolSize()
 {
 	return _pool.size();
 }
 
-UtilityLib::threading::ThreadPool::ThreadPool(size_t n)
+UtilityLib::Threading::ThreadPool::ThreadPool(size_t n)
 {
-	std::cout << "Create thread pool\n";
 	terminateThreads = false;
 	for (size_t i = 0; i < n; ++i)
 	{
@@ -25,7 +23,7 @@ UtilityLib::threading::ThreadPool::ThreadPool(size_t n)
 	}
 }
 
-void UtilityLib::threading::ThreadPool::stop()
+void UtilityLib::Threading::ThreadPool::stop()
 {
 	terminateThreads = true;
 
@@ -36,7 +34,7 @@ void UtilityLib::threading::ThreadPool::stop()
 	}
 }
 
-void UtilityLib::threading::ThreadPool::loop()
+void UtilityLib::Threading::ThreadPool::loop()
 {
 	while (true)
 	{
@@ -52,6 +50,5 @@ void UtilityLib::threading::ThreadPool::loop()
 			_tasks.pop();
 		}
 		(*task)();
-		//std::cout << "Thread id:"<< std::this_thread::get_id()<<"\n";
 	}
 }

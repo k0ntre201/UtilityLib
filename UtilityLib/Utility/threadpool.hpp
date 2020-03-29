@@ -12,7 +12,7 @@
 #include "nocopyable.hpp"
 
 
-namespace UtilityLib::threading
+namespace UtilityLib::Threading
 {
 	class ThreadPool : public nocopyable
 	{
