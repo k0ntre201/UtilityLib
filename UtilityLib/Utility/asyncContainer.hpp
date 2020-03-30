@@ -3,6 +3,7 @@
 
 #include "utility.hpp"
 
+#include <atomic>
 #include <mutex>
 #include <vector>
 #include <memory>
@@ -48,63 +49,103 @@ namespace UtilityLib::Threading
 		template <typename... _Vals>
 		decltype(auto) emplace(const_iterator _where, _Vals&&... vals) noexcept
 		{
+			std::unique_lock<std::mutex> lock(m);
+			is_busy = true;
 			_container.emplace(_where, vals...);
+			is_busy = false;
+			cv.notify_all();
 		}
 
 		template <typename... _Vals>
 		decltype(auto) emplaceBack(_Vals&&... vals) noexcept
 		{
+			std::unique_lock<std::mutex> lock(m);
+			is_busy = true;
 			_container.emplace_back(val...);
+			is_busy = false;
+			cv.notify_all();
 		}
 
 		void pushBack(const _Ty& val) noexcept
 		{
+			std::unique_lock<std::mutex> lock(m);
+			is_busy = true;
 			_container.push_back(val);
+			is_busy = false;
+			cv.notify_all();
 		}
 
 		void popBack() noexcept
 		{
+			std::unique_lock<std::mutex> lock(m);
+			while (is_busy)
+				cv.wait(lock);
 			_container.pop_back();
 		}
 
 		void erase() noexcept
 		{
+			std::unique_lock<std::mutex> lock(m);
+			while (!is_busy)
+				cv.wait(lock);
 			_container.erase();
 		}
 
 		void resize(size_type val) noexcept
 		{
+			std::unique_lock<std::mutex> lock(m);
+			is_busy = true;
 			_container.resize(val);
+			is_busy = false;
+			cv.notify_all();
 		}
 
 	public:
 		bool empty() noexcept
 		{
+			std::unique_lock<std::mutex> lock(m);
+			while (is_busy)
+				cv.wait(lock);
 			return _container.empty();
 		}
 		size_type size() noexcept
 		{
+			std::unique_lock<std::mutex> lock(m);
+			while (is_busy)
+				cv.wait(lock);
 			return _container.size();
 		}
 
 	public:
 		iterator begin() noexcept
 		{
+			std::unique_lock<std::mutex> lock(m);
+			while (is_busy)
+				cv.wait(lock);
 			return std::begin(_container);
 		}
 
 		const iterator begin() const noexcept
 		{
+			std::unique_lock<std::mutex> lock(m);
+			while (is_busy)
+				cv.wait(lock);
 			return std::begin(_container);
 		}
 
 		iterator end() noexcept
 		{
+			std::unique_lock<std::mutex> lock(m);
+			while (is_busy)
+				cv.wait(lock);
 			return std::end(_container);
 		}
 
 		const iterator end() const noexcept
 		{
+			std::unique_lock<std::mutex> lock(m);
+			while (is_busy)
+				cv.wait(lock);
 			return std::end(_container);
 		}
 
@@ -114,7 +155,7 @@ namespace UtilityLib::Threading
 	protected:
 		std::mutex m;
 		std::condition_variable cv;
-		std::atomic_bool is_busy;
+		bool is_busy{ false };
 	};
 
 	template <typename _Ty, template<typename, typename...> typename _Container, typename _Alloc = std::allocator<_Ty>>
@@ -133,22 +174,35 @@ namespace UtilityLib::Threading
 		}
 		void pushFront(const _Ty& val) noexcept
 		{
+			std::unique_lock<std::mutex> lock(m);
+			is_busy = true;
 			_container.push_front(val);
+			is_busy = false;
+			cv.notify_all();
 		}
 
 		void popFront() noexcept
 		{
+			std::unique_lock<std::mutex> lock(m);
+			while (is_busy)
+				cv.wait(lock);
 			_container.pop_front();
 		}
 
 	public:
 		_Ty& operator[](const size_type pos) noexcept
 		{
+			std::unique_lock<std::mutex> lock(m);
+			while (is_busy)
+				cv.wait(lock);
 			return _container[pos];
 		}
 
 		_Ty& operator[](const size_type pos) const noexcept
 		{
+			std::unique_lock<std::mutex> lock(m);
+			while (is_busy)
+				cv.wait(lock);
 			return _container[pos];
 		}
 	};
