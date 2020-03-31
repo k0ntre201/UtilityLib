@@ -53,26 +53,30 @@ namespace UtilityLib::Threading
 			is_busy = true;
 			_container.emplace(_where, vals...);
 			is_busy = false;
-			cv.notify_all();
+			cv.notify_one();
 		}
 
 		template <typename... _Vals>
 		decltype(auto) emplaceBack(_Vals&&... vals) noexcept
 		{
 			std::unique_lock<std::mutex> lock(m);
+			while (is_busy)
+				cv.wait(lock);
 			is_busy = true;
-			_container.emplace_back(val...);
+			_container.emplace_back(vals...);
 			is_busy = false;
-			cv.notify_all();
+			cv.notify_one();
 		}
 
 		void pushBack(const _Ty& val) noexcept
 		{
 			std::unique_lock<std::mutex> lock(m);
+			while (is_busy)
+				cv.wait(lock);
 			is_busy = true;
 			_container.push_back(val);
 			is_busy = false;
-			cv.notify_all();
+			cv.notify_one();
 		}
 
 		void popBack() noexcept
@@ -80,24 +84,32 @@ namespace UtilityLib::Threading
 			std::unique_lock<std::mutex> lock(m);
 			while (is_busy)
 				cv.wait(lock);
+			is_busy = true;
 			_container.pop_back();
+			is_busy = false;
+			cv.notify_one();
 		}
 
 		void erase() noexcept
 		{
 			std::unique_lock<std::mutex> lock(m);
-			while (!is_busy)
+			while (is_busy)
 				cv.wait(lock);
+			is_busy = true;
 			_container.erase();
+			is_busy = false;
+			cv.notify_one();
 		}
 
 		void resize(size_type val) noexcept
 		{
 			std::unique_lock<std::mutex> lock(m);
+			while (is_busy)
+				cv.wait(lock);
 			is_busy = true;
 			_container.resize(val);
 			is_busy = false;
-			cv.notify_all();
+			cv.notify_one();
 		}
 
 	public:
@@ -106,14 +118,20 @@ namespace UtilityLib::Threading
 			std::unique_lock<std::mutex> lock(m);
 			while (is_busy)
 				cv.wait(lock);
+			is_busy = true;
 			return _container.empty();
+			is_busy = false;
+			cv.notify_one();
 		}
 		size_type size() noexcept
 		{
 			std::unique_lock<std::mutex> lock(m);
 			while (is_busy)
 				cv.wait(lock);
+			is_busy = true;
 			return _container.size();
+			is_busy = false;
+			cv.notify_one();
 		}
 
 	public:
@@ -122,7 +140,11 @@ namespace UtilityLib::Threading
 			std::unique_lock<std::mutex> lock(m);
 			while (is_busy)
 				cv.wait(lock);
-			return std::begin(_container);
+			is_busy = true;
+			iterator it = std::begin(_container);
+			is_busy = false;
+			cv.notify_one();
+			return it;
 		}
 
 		const iterator begin() const noexcept
@@ -130,7 +152,11 @@ namespace UtilityLib::Threading
 			std::unique_lock<std::mutex> lock(m);
 			while (is_busy)
 				cv.wait(lock);
-			return std::begin(_container);
+			is_busy = true;
+			iterator it = std::begin(_container);
+			is_busy = false;
+			cv.notify_one();
+			return it;
 		}
 
 		iterator end() noexcept
@@ -138,7 +164,11 @@ namespace UtilityLib::Threading
 			std::unique_lock<std::mutex> lock(m);
 			while (is_busy)
 				cv.wait(lock);
-			return std::end(_container);
+			is_busy = true;
+			iterator it = std::end(_container);
+			is_busy = false;
+			cv.notify_one();
+			return it;
 		}
 
 		const iterator end() const noexcept
@@ -146,7 +176,22 @@ namespace UtilityLib::Threading
 			std::unique_lock<std::mutex> lock(m);
 			while (is_busy)
 				cv.wait(lock);
-			return std::end(_container);
+			is_busy = true;
+			iterator it = std::end(_container);
+			is_busy = false;
+			cv.notify_one();
+			return it;
+		}
+
+		void sort() noexcept
+		{
+			std::unique_lock<std::mutex> lock(m);
+			while (is_busy)
+				cv.wait(lock);
+			is_busy = true;
+			std::sort(std::begin(_container), std::end(_container));
+			is_busy = false;
+			cv.notify_one();
 		}
 
 	protected:
@@ -162,7 +207,22 @@ namespace UtilityLib::Threading
 	class Deque : public Container<_Ty, _Container, _Alloc>
 	{
 	public:
-		Deque() {}
+		using value_type = _Ty;
+		using allocator_type = _Alloc;
+		using pointer = typename _Container<value_type, allocator_type>::pointer;
+		using const_pointer = typename _Container<value_type, allocator_type>::const_pointer;
+		using reference = _Ty&;
+		using const_reference = const _Ty&;
+		using size_type = typename _Container<value_type, allocator_type>::size_type;
+		using difference_type = typename _Container<value_type, allocator_type>::difference_type;
+
+	public:
+		using iterator = typename _Container<value_type, allocator_type>::iterator;
+		using const_iterator = typename _Container<value_type, allocator_type>::const_iterator;
+		using reverse_iterator = typename _Container<value_type, allocator_type>::reverse_iterator;
+		using const_reverse_iterator = typename _Container<value_type, allocator_type>::const_reverse_iterator;
+	public:
+		Deque():Container<_Ty, _Container, _Alloc>(){}
 
 		template <typename _Iter, typename = typename std::enable_if<is_iterator_v<_Iter>>>
 		Deque(_Iter first, _Iter last, const _Alloc& alloc = _Alloc()) : Container<_Ty, _Container, _Alloc>(first, last, alloc)
@@ -174,36 +234,36 @@ namespace UtilityLib::Threading
 		}
 		void pushFront(const _Ty& val) noexcept
 		{
-			std::unique_lock<std::mutex> lock(m);
-			is_busy = true;
-			_container.push_front(val);
-			is_busy = false;
-			cv.notify_all();
+			std::unique_lock<std::mutex> lock(this->m);
+			this->is_busy = true;
+			this->_container.push_front(val);
+			this->is_busy = false;
+			this->cv.notify_all();
 		}
 
 		void popFront() noexcept
 		{
-			std::unique_lock<std::mutex> lock(m);
-			while (is_busy)
-				cv.wait(lock);
-			_container.pop_front();
+			std::unique_lock<std::mutex> lock(this->m);
+			while (this->is_busy)
+				this->cv.wait(lock);
+			this->_container.pop_front();
 		}
 
 	public:
 		_Ty& operator[](const size_type pos) noexcept
 		{
-			std::unique_lock<std::mutex> lock(m);
-			while (is_busy)
-				cv.wait(lock);
-			return _container[pos];
+			std::unique_lock<std::mutex> lock(this->m);
+			while (this->is_busy)
+				this->cv.wait(lock);
+			return this->_container[pos];
 		}
 
-		_Ty& operator[](const size_type pos) const noexcept
+		const _Ty& operator[](const size_type pos) const noexcept
 		{
-			std::unique_lock<std::mutex> lock(m);
-			while (is_busy)
-				cv.wait(lock);
-			return _container[pos];
+			std::unique_lock<std::mutex> lock(this->m);
+			while (this->is_busy)
+				this->cv.wait(lock);
+			return this->_container[pos];
 		}
 	};
 
