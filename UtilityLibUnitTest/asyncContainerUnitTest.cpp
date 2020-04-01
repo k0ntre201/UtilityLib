@@ -8,7 +8,7 @@ using namespace UtilityLib::Threading;
 
 TEST(AsyncContainerTest, PushPopTest)
 {
-	Deque<int, std::deque> container;
+	deque<int> container;
 	container.pushBack(10);
 	container.pushBack(20);
 	container.pushFront(0);
@@ -27,7 +27,7 @@ TEST(AsyncContainerTest, PushPopTest)
 
 TEST(AsyncContainerTest, TableOperatorTest)
 {
-	Deque<int, std::deque> container;
+	deque<int> container;
 	container.pushBack(10);
 	container.pushBack(20);
 	container.pushFront(0);
@@ -47,7 +47,7 @@ TEST(AsyncContainerTest, TableOperatorTest)
 
 TEST(AsyncContainerTest, SortTest)
 {
-	Deque<int, std::deque> container({ 10, 20, -10, -20, 0, 5, 10 });
+	deque<int> container({ 10, 20, -10, -20, 0, 5, 10 });
 	std::sort(std::begin(container), std::end(container));
 	EXPECT_TRUE(std::is_sorted(std::begin(container), std::end(container)));
 
@@ -59,14 +59,14 @@ TEST(AsyncContainerTest, SortTest)
 
 TEST(AsyncContainerTest, MultithreadSortTest)
 {
-	Container<int, std::deque> container;
+	deque<int> container;
 	bool done{ false };
 	std::thread pusher([&]()
 		{
 			std::random_device rd;
 			std::mt19937 gen(rd());
 			std::uniform_int_distribution<> dist(-10000, 10000);
-			for (int i{ 0 }; i < 100000; ++i)
+			for (int i{ 0 }; i < 10000; ++i)
 				container.pushBack(dist(gen));
 			done = true;
 		});

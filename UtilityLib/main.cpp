@@ -4,14 +4,14 @@
 using namespace UtilityLib::Threading;
 int main()
 {
-	Container<int, std::deque> container;
+	deque<int> container;
 	bool done{ false };
 	std::thread pusher([&]()
 		{
 			std::random_device rd;
 			std::mt19937 gen(rd());
 			std::uniform_int_distribution<> dist(-10000, 10000);
-			for (int i{ 0 }; i < 100000; ++i)
+			for (int i{ 0 }; i < 10000; ++i)
 				container.pushBack(dist(gen));
 			done = true;
 		});
@@ -22,6 +22,7 @@ int main()
 				container.sort();
 				std::this_thread::sleep_for(std::chrono::milliseconds(10));
 			}
+			container.sort();
 		});
 	pusher.join();
 	sorter.join();
