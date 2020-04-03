@@ -16,8 +16,62 @@ namespace UtilityLib::Threading
 	template <typename _Ty, template<typename...> typename _Container, typename _Alloc = std::allocator<_Ty>>
 	class _AbstractInstructions
 	{
-	protected:
+	public:
+		virtual ~_AbstractInstructions() = default;
 
+	public:
+		using value_type = _Ty;
+		using reference = _Ty&;
+		using const_reference = const _Ty&;
+		//using size_type = typename _Container<value_type>::size_type;
+	public:
+		const_reference front() const noexcept
+		{
+			return this->getSmth([&]() {return this->_container.front(); });
+		}
+
+		const_reference back() const noexcept
+		{
+			return this->getSmth([&]() {return this->_container.back(); });
+		}
+
+		decltype(auto) front() noexcept
+		{
+			return this->getSmth([&]() {return this->_container.front(); });
+		}
+
+		decltype(auto) back() noexcept
+		{
+			return this->getSmth([&]() {return this->_container.back(); });
+		}
+
+	public:
+		bool empty() noexcept
+		{
+			return this->getSmth([&]() { return this->_container.empty(); });
+		}
+
+		auto size() noexcept
+		{
+			return this->getSmth([&]() { return this->_container.size(); });
+		}
+
+	public:
+		template <typename... _Vals>
+		decltype(auto) emplace(_Vals&&... vals) noexcept
+		{
+			return this->getSmth([&]() { this->_container.emplace(vals...); });
+		}
+
+	public:
+		template <typename Cont>
+		decltype(auto) swap(Cont&& c)
+		{
+			this->doSmth([&]() {this->_container.swap(c._container); });
+			return *this;
+		}
+
+	protected:
 		template <typename F, typename... Args>
 		void doSmth(F&& f, Args&&... args)
 		{
@@ -49,12 +103,14 @@ namespace UtilityLib::Threading
 		bool is_busy{ false };
 
 	protected:
-		_Container<_Ty, _Alloc> _container;
+		_Container<_Ty> _container;
 	};
 
 	template <typename _Ty, template<typename...> typename _Container, typename _Alloc = std::allocator<_Ty>>
 	class _ContainerIterators : public _AbstractInstructions<_Ty, _Container, _Alloc>
 	{
+	public:
+		virtual ~_ContainerIterators() = default;
 	public:
 		using value_type = _Ty;
 		using allocator_type = _Alloc;
@@ -70,6 +126,7 @@ namespace UtilityLib::Threading
 		using const_iterator = typename _Container<value_type, allocator_type>::const_iterator;
 		using reverse_iterator = typename _Container<value_type, allocator_type>::reverse_iterator;
 		using const_reverse_iterator = typename _Container<value_type, allocator_type>::const_reverse_iterator;
+
 	public:
 		iterator begin() noexcept
 		{
@@ -81,6 +138,11 @@ namespace UtilityLib::Threading
 			return this->getSmth([&]() { return std::begin(this->_container); });
 		}
 
+		const iterator cbegin() const noexcept
+		{
+			return this->getSmth([&]() { return std::cbegin(this->_container); });
+		}
+
 		iterator end() noexcept
 		{
 			return this->getSmth([&]() { return std::end(this->_container); });
@@ -90,6 +152,41 @@ namespace UtilityLib::Threading
 		{
 			return this->getSmth([&]() { return std::end(this->_container); });
 		}
+
+		const iterator cend() const noexcept
+		{
+			return this->getSmth([&]() { return std::cend(this->_container); });
+		}
+
+		iterator rbegin() noexcept
+		{
+			return this->getSmth([&]() { return std::rbegin(this->_container); });
+		}
+
+		const iterator rbegin() const noexcept
+		{
+			return this->getSmth([&]() { return std::rbegin(this->_container); });
+		}
+
+		const iterator crbegin() const noexcept
+		{
+			return this->getSmth([&]() { return std::crbegin(this->_container); });
+		}
+
+		iterator rend() noexcept
+		{
+			return this->getSmth([&]() { return std::rend(this->_container); });
+		}
+
+		const iterator rend() const noexcept
+		{
+			return this->getSmth([&]() { return std::rend(this->_container); });
+		}
+
+		const iterator crend() const noexcept
+		{
+			return this->getSmth([&]() { return std::crend(this->_container); });
+		}
 	};
 
 	template <typename _Ty, template<typename...> typename _Container, typename _Alloc = std::allocator<_Ty>>
@@ -97,49 +194,41 @@ namespace UtilityLib::Threading
 	{
 	public:
 		using value_type = _Ty;
-		using const_pointer = typename _Container<value_type>::const_pointer;
 		using reference = _Ty&;
 		using const_reference = const _Ty&;
 		using size_type = typename _Container<value_type>::size_type;
 		
 	public:
-		Queue() {}
+		Queue() = default;
 
-		template <typename _Iter, typename = typename std::enable_if<is_iterator_v<_Iter>>>
-		Queue(_Iter first, _Iter last, const _Alloc& alloc = _Alloc())
+		Queue(const _Container<_Ty>& c)
 		{
-			this->_container = _Container<_Ty, _Alloc>(first, last, alloc);
+			this->_container = std::move(c);
 		}
 
-		Queue(std::initializer_list<_Ty> list, const _Alloc& alloc = _Alloc())
+		Queue(const Queue& q)
 		{
-			this->_container = _Container<_Ty, _Alloc>(list, alloc);
+			this->_container = q._container;
 		}
 
-		const_reference front() noexcept
+		Queue(Queue&& q)
 		{
-			return this->getSmth([&]() {return this->_container.front(); });
+			this->_container = q._container;
 		}
 
-		const_reference back() noexcept
+		virtual ~Queue() = default;
+
+	public:
+		decltype(auto) push(const_reference val) noexcept
 		{
-			return this->getSmth([&]() {return this->_container.back(); });
+			this->doSmth([&]() {this->_container.push(val); });
+			return *this;
 		}
 
-		void push(const_reference val) noexcept
+		decltype(auto) pop() noexcept
 		{
-			this->doSmth([&]() {this->container.push(val); });
-		}
-
-		void pop() noexcept
-		{
-			this->doSmth([&]() {this->container.pop(); });
-		}
-
-		template <typename... _Vals>
-		decltype(auto) emplace(_Vals&&... vals) noexcept
-		{
-			this->doSmth([&]() { this->_container.emplace(vals...); });
+			this->doSmth([&]() {this->_container.pop(); });
+			return *this;
 		}
 	};
 
@@ -165,6 +254,21 @@ namespace UtilityLib::Threading
 	public:
 		Container() {}
 
+		Container(const _Container<_Ty>& c)
+		{
+			this->_container = std::move(c);
+		}
+
+		Container(const Container& cnt)
+		{
+			this._container = cnt._container;
+		}
+
+		Container(Container&& cnt)
+		{
+			this._container = std::move(cnt._container);
+		}
+
 		template <typename _Iter, typename = typename std::enable_if<is_iterator_v<_Iter>>>
 		Container(_Iter first, _Iter last, const _Alloc& alloc = _Alloc())
 		{
@@ -175,52 +279,51 @@ namespace UtilityLib::Threading
 			this->_container = _Container<_Ty, _Alloc>(list, alloc);
 		}
 
+		virtual ~Container() = default;
+
 	public:
 		template <typename... _Vals>
 		decltype(auto) emplace(const_iterator _where, _Vals&&... vals) noexcept
 		{
-			this->doSmth([&]() { this->_container.emplace(_where, vals...); });
+			return this->getSmth([&]() { this->_container.emplace(_where, vals...); });
 		}
 
 		template <typename... _Vals>
 		decltype(auto) emplaceBack(_Vals&&... vals) noexcept
 		{
-			this->doSmth([&]() { this->_container.emplace_back(vals...); });
+			return this->getSmth([&]() { this->_container.emplace_back(vals...); });
 		}
 
-		void pushBack(const _Ty& val) noexcept
+		decltype(auto) pushBack(const _Ty& val) noexcept
 		{
 			this->doSmth([&]() { this->_container.push_back(val); });
+			return *this;
 		}
 
-		void popBack() noexcept
+		decltype(auto) popBack() noexcept
 		{
 			this->doSmth([&]() { this->_container.pop_back(); });
+			return *this;
 		}
 
-		void erase() noexcept
+		decltype(auto) erase() noexcept
 		{
 			this->doSmth([&]() { this->_container.erase(); });
+			return *this;
 		}
 
-		void resize(size_type val) noexcept
+		decltype(auto) resize(size_type val) noexcept
 		{
 			this->doSmth([&]() { this->_container.resize(val); });
+			return *this;
+		}
+
+		decltype(auto) maxSize() noexcept
+		{
+			this->getSmth([&]() { return this->_container.max_size(); });
 		}
 
 	public:
-		bool empty() noexcept
-		{
-			return this->getSmth([&]() { return this->_container.empty(); });
-		}
-
-		size_type size() noexcept
-		{
-			return this->getSmth([&]() { return this->_container.size(); });
-		}
-
-	public:
-
 		template <typename Algorithm>
 		decltype(auto) algorithm(Algorithm&& alg)
 		{
@@ -265,17 +368,24 @@ namespace UtilityLib::Threading
 		using const_iterator = typename _Container<value_type, allocator_type>::const_iterator;
 		using reverse_iterator = typename _Container<value_type, allocator_type>::reverse_iterator;
 		using const_reverse_iterator = typename _Container<value_type, allocator_type>::const_reverse_iterator;
+
 	public:
-		Deque():Container<_Ty, _Container, _Alloc>(){}
+		Deque() :Container<_Ty, _Container, _Alloc>(){}
+
+		Deque(const _Container<_Ty>& c) :Container<_Ty, _Container, _Alloc>(c) {}
+
+		Deque(const Deque& cnt) :Container<_Ty, _Container, _Alloc>(cnt) {}
+
+		Deque(Deque&& cnt) :Container<_Ty, _Container, _Alloc>(cnt) {}
 
 		template <typename _Iter, typename = typename std::enable_if<is_iterator_v<_Iter>>>
-		Deque(_Iter first, _Iter last, const _Alloc& alloc = _Alloc()) : Container<_Ty, _Container, _Alloc>(first, last, alloc)
-		{
-		}
+		Deque(_Iter first, _Iter last, const _Alloc& alloc = _Alloc()) : Container<_Ty, _Container, _Alloc>(first, last, alloc){}
 
-		Deque(std::initializer_list<_Ty> list, const _Alloc& alloc = _Alloc()) :Container<_Ty, _Container, _Alloc>(list, alloc)
-		{
-		}
+		Deque(std::initializer_list<_Ty> list, const _Alloc& alloc = _Alloc()) :Container<_Ty, _Container, _Alloc>(list, alloc){}
+
+		virtual ~Deque() = default;
+
+	public:
 		void pushFront(const _Ty& val) noexcept
 		{
 			this->doSmth([&]() { this->_container.push_front(val); });
@@ -285,8 +395,13 @@ namespace UtilityLib::Threading
 		{
 			this->doSmth([&]() { this->_container.pop_front(); });
 		}
-
+		
 	public:
+		decltype(auto) at(const size_type pos) noexcept
+		{
+			return this->getSmth([&]() {return std::move(this->_container.at(pos)); });
+		}
+
 		decltype(auto) operator[](const size_type pos) noexcept
 		{
 			return this->getSmth([&]() {return std::move(this->_container[pos]); });
@@ -296,7 +411,6 @@ namespace UtilityLib::Threading
 		{
 			return this->getSmth([&]() {return std::move(this->_container[pos]); });
 		}
-		
 	};
 
 	template <typename T, typename Alloc = std::allocator<T>>

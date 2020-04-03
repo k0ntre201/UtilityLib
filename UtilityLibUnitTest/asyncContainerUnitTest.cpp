@@ -83,3 +83,20 @@ TEST(AsyncContainerTest, MultithreadSortTest)
 	sorter.join();
 	EXPECT_TRUE(std::is_sorted(std::begin(container), std::end(container)));
 }
+
+TEST(AsyncContainerTest, SwapTest)
+{
+	queue<int> q1;
+	q1.push(1);
+	q1.push(2);
+	q1.push(3);
+	queue<int> q2;
+	q2.push(4);
+	q2.push(5);
+	q2.push(6);
+
+	q2.swap(q1);
+
+	bool isSwapped = (q1.front() == 4 && q1.back() == 6);
+	EXPECT_TRUE(isSwapped);
+};
