@@ -1,7 +1,13 @@
 #include <iostream>
-#include "Utility/asyncContainer.hpp"
+#include "Utility/AsyncContainers/deque.hpp"
+#include "Utility/AsyncContainers/queue.hpp"
+#include "Utility/AsyncContainers/list.hpp"
+#include "Utility/AsyncContainers/vector.hpp"
+
 #include <random>
+
 using namespace UtilityLib::Threading;
+
 int main()
 {
 	deque<int> container;
@@ -28,6 +34,10 @@ int main()
 	sorter.join();
 
 	std::cout << std::is_sorted(std::begin(container), std::end(container));
+
+	queue<int> q;
+	vector<int> v({ 1,2,3 });
+	list<int> l({ 1,2,3 });
 
 	return 0;
 }
