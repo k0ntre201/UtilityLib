@@ -10,7 +10,7 @@ using namespace UtilityLib::Threading;
 
 int main()
 {
-	deque<int> container;
+	list<int> container;
 	bool done{ false };
 	std::thread pusher([&]()
 		{

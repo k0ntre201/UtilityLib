@@ -7,8 +7,7 @@
 
 
 /*
-Chect whether _Iter is an iterator. Value true if it is an iterator or pointer type.
-Otherwise value is equal to false;
+Check is _Iter an iterator type. True if is an iterator or pointer type.
 */
 
 template <typename _Iter, typename = void>
