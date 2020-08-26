@@ -4,7 +4,9 @@
 #include <iterator>
 #include <type_traits>
 #include <utility>
-
+#include <string>
+#include <sstream>
+#include <iomanip>
 
 /*
 Check is _Iter an iterator type. True if is an iterator or pointer type.
@@ -24,6 +26,14 @@ struct is_iterator<_Iter, typename std::enable_if<!std::is_same<typename std::it
 
 template <typename _Iter>
 inline constexpr bool is_iterator_v = is_iterator<_Iter>::value;
+
+template< typename T >
+std::string int_to_hex(T i)
+{
+	std::stringstream stream;
+	stream << std::setfill('0') << std::setw(sizeof(T) * 2) << std::hex << i;
+	return stream.str();
+}
 
 #endif // !__UTILITY_H
 

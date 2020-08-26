@@ -78,7 +78,7 @@ namespace UtilityLib::Threading
 	class ThreadPoolSingleton : public ThreadPool
 	{
 	public:
-		// Get instance of thread pool. Pool has size of hardwate cores as a default.
+		// Get instance of thread pool. Pool has size of hardware cores as a default.
 		static std::shared_ptr<ThreadPool> getInstance(size_t n = std::thread::hardware_concurrency() + 1)
 		{
 			if (_instance == nullptr)
