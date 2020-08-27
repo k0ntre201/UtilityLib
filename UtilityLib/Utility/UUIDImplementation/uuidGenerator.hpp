@@ -9,6 +9,6 @@ namespace UtilityLib::Generators
 	class uuidGenerator
 	{
 	public:
-		static Types::uint128_t generate();
+		static Types::uint128_t v4();
 	};
 }

@@ -35,5 +35,14 @@ std::string int_to_hex(T i)
 	return stream.str();
 }
 
+template <typename T> T hex_to_decimal(std::string s)
+{
+	T i;
+	std::stringstream stream;
+	stream << s;
+	stream >> std::hex >> i;
+	return i;
+}
+
 #endif // !__UTILITY_H
 
