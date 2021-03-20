@@ -151,6 +151,13 @@ namespace UtilityLib::Threading::Container
 			this->doSmth([&]() { this->_container.sort(p); });
 			return *this;
 		}
+
+	public:
+		List& operator=(const List& container)
+		{
+			this->_container = container._container;
+			return *this;
+		}
 	};
 }
 

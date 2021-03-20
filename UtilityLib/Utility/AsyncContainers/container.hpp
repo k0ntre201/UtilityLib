@@ -219,12 +219,12 @@ namespace UtilityLib::Threading::Container
 
 		Container(const Container& cnt)
 		{
-			this._container = cnt._container;
+			this->_container = cnt._container;
 		}
 
 		Container(Container&& cnt)
 		{
-			this._container = std::move(cnt._container);
+			this->_container = std::move(cnt._container);
 		}
 
 		template <typename _Iter, typename = typename std::enable_if<is_iterator_v<_Iter>>>
